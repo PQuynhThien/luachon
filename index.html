@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ai đẹp trai nhất?</title>
     <style>
-        /* Toàn bộ giao diện */
+      
         body, html {
             margin: 0;
             padding: 0;
@@ -34,7 +34,7 @@
             margin-bottom: 30px;
         }
 
-        /* Group chứa 2 nút ban đầu */
+        
         .btn-container {
             display: flex;
             justify-content: center;
@@ -54,7 +54,7 @@
             min-width: 100px;
         }
 
-        /* Nút Thiện */
+        
         #btnThien {
             background-color: #2ecc71;
             color: white;
@@ -65,15 +65,14 @@
             background-color: #27ae60;
         }
 
-        /* Nút Phúc */
+       
         #btnPhuc {
             background-color: #e74c3c;
             color: white;
-            position: relative; /* Lúc đầu nằm yên trong flexbox */
-            z-index: 999;
+            position: relative; 
         }
 
-        /* Overlay thông báo */
+       
         #overlay {
             display: none;
             position: fixed;
@@ -116,19 +115,19 @@
 
     <script>
         function runAway(btn) {
-            // Chuyển sang position fixed để có thể bay khắp màn hình
+            
             btn.style.position = 'fixed';
             
-            // Tính toán khoảng cách an toàn để không bị dính vào mép
+            
             const padding = 50;
             const maxX = window.innerWidth - btn.offsetWidth - padding;
             const maxY = window.innerHeight - btn.offsetHeight - padding;
 
-            // Tọa độ ngẫu nhiên
+            
             const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
             const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
 
-            // Áp dụng vị trí mới với hiệu ứng mượt
+            
             btn.style.transition = 'all 0.2s ease';
             btn.style.left = randomX + 'px';
             btn.style.top = randomY + 'px';
@@ -140,3 +139,4 @@
     </script>
 </body>
 </html>
+
