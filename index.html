@@ -405,9 +405,9 @@
 <div id="toast"></div>
 
 <script>
-/**
- * TIKTOK PRO DOWNLOADER - ENTERPRISE EDITION WITH CONTINUOUS CLIPBOARD AUTO-DOWNLOAD
- */
+
+ 
+ 
 
 const Config = {
     API_ENDPOINT: "https://www.tikwm.com/api/",
@@ -658,19 +658,19 @@ const App = {
             if (Config.REGEX.test(link)) { input.value = link; this.handleProcess(); }
         };
 
-        // Lắng nghe liên tục khi user quay trở lại web (Switch ứng dụng từ TikTok về Trình duyệt)
+        
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 this.checkAutoPasteClipboard();
             }
         });
 
-        // Lắng nghe khi tab hoặc cửa sổ trình duyệt được focus vào
+        
         window.addEventListener('focus', () => {
             this.checkAutoPasteClipboard();
         });
 
-        // Bắt tương tác đầu tiên của người dùng trên trang
+        
         const autoCheckOnTouch = () => {
             this.checkAutoPasteClipboard();
         };
@@ -687,7 +687,7 @@ const App = {
                     const matchedUrl = match[0];
                     const input = document.getElementById('urlInput');
                     
-                    // So sánh link trong bộ nhớ tạm với link đã được phân tích gần nhất (lastProcessedUrl)
+                    
                     if (matchedUrl !== this.lastProcessedUrl) {
                         input.value = matchedUrl;
                         document.getElementById('clearBtn').style.display = 'flex';
@@ -697,7 +697,7 @@ const App = {
                 }
             }
         } catch (err) {
-            // Trường hợp trình duyệt chưa cấp quyền truy cập clipboard tự động
+            
         }
     },
     async handleProcess(isAutoDownload = false) {
@@ -710,7 +710,7 @@ const App = {
         try {
             const data = await TikTokService.fetchInfo(url);
             
-            // Cập nhật link vừa xử lý thành công để liên tục chờ link tiếp theo
+            
             this.lastProcessedUrl = url;
             
             UIManager.renderResult(data);
