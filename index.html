@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -405,7 +406,7 @@
 
 <script>
 /**
- * TIKTOK PRO DOWNLOADER - ENTERPRISE EDITION WITH AUTO CLIPBOARD DETECT
+ * TIKTOK PRO DOWNLOADER - ENTERPRISE EDITION WITH CONTINUOUS CLIPBOARD AUTO-DOWNLOAD
  */
 
 const Config = {
@@ -485,21 +486,21 @@ const DownloadManager = {
         const wrapper = document.getElementById(`progress-wrapper-${progressId}`);
         const bar = document.getElementById(`progress-bar-${progressId}`);
         const btn = document.getElementById(`btn-dl-${progressId}`);
-        wrapper.style.display = 'block';
-        btn.classList.add('loading');
+        if (wrapper) wrapper.style.display = 'block';
+        if (btn) btn.classList.add('loading');
         try {
             for (let i = 0; i < images.length; i++) {
                 const imgResponse = await fetch(images[i]);
                 zip.file(`tiktok_photo_${i + 1}.jpg`, await imgResponse.blob());
-                bar.style.width = `${Math.round(((i + 1) / images.length) * 50)}%`;
+                if (bar) bar.style.width = `${Math.round(((i + 1) / images.length) * 50)}%`;
             }
             const content = await zip.generateAsync({type: "blob"}, (m) => {
-                bar.style.width = `${50 + Math.round(m.percent / 2)}%`;
+                if (bar) bar.style.width = `${50 + Math.round(m.percent / 2)}%`;
             });
             this.saveBlob(content, `tiktok_photos_${Date.now()}.zip`);
             UIManager.showToast("Đã tải xong ZIP!");
         } catch (err) { UIManager.showToast("Lỗi nén ZIP!", "error"); }
-        finally { btn.classList.remove('loading'); setTimeout(() => { wrapper.style.display = 'none'; }, 2000); }
+        finally { if (btn) btn.classList.remove('loading'); setTimeout(() => { if (wrapper) wrapper.style.display = 'none'; }, 2000); }
     },
     saveBlob(blob, filename) {
         const url = URL.createObjectURL(blob);
@@ -624,7 +625,7 @@ const HistoryManager = {
 
 const App = {
     isProcessing: false,
-    lastAutoUrl: "",
+    lastProcessedUrl: "",
     init() { 
         ThemeManager.init(); 
         HistoryManager.render(); 
@@ -657,21 +658,24 @@ const App = {
             if (Config.REGEX.test(link)) { input.value = link; this.handleProcess(); }
         };
 
-        // Khi người dùng chuyển tab quay lại web (đặc biệt mượt trên mobile)
+        // Lắng nghe liên tục khi user quay trở lại web (Switch ứng dụng từ TikTok về Trình duyệt)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 this.checkAutoPasteClipboard();
             }
         });
 
-        // Bắt cú chạm đầu tiên trên mobile nếu trình duyệt yêu cầu tương tác
+        // Lắng nghe khi tab hoặc cửa sổ trình duyệt được focus vào
+        window.addEventListener('focus', () => {
+            this.checkAutoPasteClipboard();
+        });
+
+        // Bắt tương tác đầu tiên của người dùng trên trang
         const autoCheckOnTouch = () => {
             this.checkAutoPasteClipboard();
-            window.removeEventListener('touchstart', autoCheckOnTouch);
-            window.removeEventListener('click', autoCheckOnTouch);
         };
-        window.addEventListener('touchstart', autoCheckOnTouch, { once: true });
-        window.addEventListener('click', autoCheckOnTouch, { once: true });
+        window.addEventListener('touchstart', autoCheckOnTouch, { passive: true });
+        window.addEventListener('click', autoCheckOnTouch, { passive: true });
     },
     async checkAutoPasteClipboard() {
         if (this.isProcessing) return;
@@ -683,18 +687,17 @@ const App = {
                     const matchedUrl = match[0];
                     const input = document.getElementById('urlInput');
                     
-                    // Chỉ tự động phân tích nếu đó là link mới chưa vừa chạy xong
-                    if (matchedUrl !== this.lastAutoUrl && input.value !== matchedUrl) {
-                        this.lastAutoUrl = matchedUrl;
+                    // So sánh link trong bộ nhớ tạm với link đã được phân tích gần nhất (lastProcessedUrl)
+                    if (matchedUrl !== this.lastProcessedUrl) {
                         input.value = matchedUrl;
                         document.getElementById('clearBtn').style.display = 'flex';
-                        UIManager.showToast("Đã tự động dán link từ bộ nhớ tạm!");
+                        UIManager.showToast("Phát hiện link mới! Đang tự động dán & tải...");
                         this.handleProcess(document.getElementById('autoDownloadToggle').checked);
                     }
                 }
             }
         } catch (err) {
-            // Trình duyệt chặn quyền Clipboard tự động mà không qua thao tác chạm
+            // Trường hợp trình duyệt chưa cấp quyền truy cập clipboard tự động
         }
     },
     async handleProcess(isAutoDownload = false) {
@@ -706,6 +709,10 @@ const App = {
         UIManager.toggleLoading(true);
         try {
             const data = await TikTokService.fetchInfo(url);
+            
+            // Cập nhật link vừa xử lý thành công để liên tục chờ link tiếp theo
+            this.lastProcessedUrl = url;
+            
             UIManager.renderResult(data);
             HistoryManager.save(data);
             const mainFile = data.play || (data.images ? data.images[0] : null);
